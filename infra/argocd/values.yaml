@@ -3,12 +3,10 @@
 nameOverride: ip-app
 
 image:
-  # Docker image repository
-  # Typically stored in a container registry like GCR, ECR, Docker Hub, etc.
-  repository: europe-west2-docker.pkg.dev/org-project/ip-app-repo/ip-app
+  # Docker image repository hosted in the private registry
+  repository: registry.example.com/team/ip-app
 
-  # Docker image tag to pull (e.g., "v1.2.3", "stable")
-  # "latest" is not recommended in production due to immutability concerns
+  # Docker image tag to pull (updated automatically by the workflow)
   tag: "latest"
 
   # Image pull policy:

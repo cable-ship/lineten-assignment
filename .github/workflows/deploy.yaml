@@ -12,49 +12,46 @@ jobs:
 
     permissions:
       contents: write
-      id-token: write
+
+    env:
+      REGISTRY_URL: ${{ secrets.PRIVATE_REGISTRY_URL }}
+      IMAGE_REPOSITORY: ${{ secrets.PRIVATE_REGISTRY_REPOSITORY }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up gcloud
-      uses: google-github-actions/auth@v2
-      with:
-        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-        service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+    - name: Set image tag
+      run: |
+        IMAGE_TAG=$(git rev-parse --short HEAD)
+        echo "IMAGE_TAG=$IMAGE_TAG" >> "$GITHUB_ENV"
 
-    - name: Install gcloud SDK
-      uses: google-github-actions/setup-gcloud@v2
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-
-    - name: Configure Docker for Artifact Registry
-      run: gcloud auth configure-docker europe-west2-docker.pkg.dev
+    - name: Log in to private registry
+      env:
+        REGISTRY_USERNAME: ${{ secrets.PRIVATE_REGISTRY_USERNAME }}
+        REGISTRY_PASSWORD: ${{ secrets.PRIVATE_REGISTRY_PASSWORD }}
+      run: |
+        echo "$REGISTRY_PASSWORD" | docker login "$REGISTRY_URL" -u "$REGISTRY_USERNAME" --password-stdin
 
     - name: Build Docker image
       run: |
-        IMAGE_TAG=$(git rev-parse --short HEAD)
-        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-        docker build -t europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/app-repo/ip-app:$IMAGE_TAG .
+        docker build -t "$REGISTRY_URL/$IMAGE_REPOSITORY:$IMAGE_TAG" .
 
     - name: Push Docker image
       run: |
-        docker push europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/app-repo/ip-app:$IMAGE_TAG
+        docker push "$REGISTRY_URL/$IMAGE_REPOSITORY:$IMAGE_TAG"
 
     - name: Install yq
       run: sudo snap install yq
 
     - name: Update values.yaml with new image tag
       run: |
-        IMAGE_TAG=$(git rev-parse --short HEAD)
-        yq e '.image.tag = strenv(IMAGE_TAG)' -i argocd/values.yaml
+        yq e '.image.tag = strenv(IMAGE_TAG)' -i infra/argocd/values.yaml
 
     - name: Commit and push updated values.yaml
       run: |
-        IMAGE_TAG=$(git rev-parse --short HEAD)
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add argocd/values.yaml
+        git add infra/argocd/values.yaml
         git commit -m "Update image tag to $IMAGE_TAG"
         git push
