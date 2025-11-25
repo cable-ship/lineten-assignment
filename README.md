@@ -1,4 +1,4 @@
-1. # Ping Pong API
+1. # Infra Deploy Demo
 
    ## Overview
 
