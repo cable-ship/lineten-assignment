@@ -1,0 +1,43 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - release/production
+
+jobs:
+  build-and-push-image:
+    name: Build and push Docker image
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up gcloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+    - name: Install gcloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Configure Docker for Artifact Registry
+      run: gcloud auth configure-docker europe-west2-docker.pkg.dev
+
+    - name: Build Docker image
+      run: |
+        IMAGE_TAG=$(git rev-parse --short HEAD)
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+        docker build -t europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/app-repo/ip-app:$IMAGE_TAG .
+
+    - name: Push Docker image
+      run: |
+        docker push europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/app-repo/ip-app:$IMAGE_TAG
