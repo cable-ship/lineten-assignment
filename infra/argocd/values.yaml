@@ -1,0 +1,154 @@
+# Overrides the default Helm release name
+# Useful for naming services and resources consistently
+nameOverride: ip-app
+
+image:
+  # Docker image repository
+  # Typically stored in a container registry like GCR, ECR, Docker Hub, etc.
+  repository: europe-west2-docker.pkg.dev/org-project/ip-app-repo/ip-app
+
+  # Docker image tag to pull (e.g., "v1.2.3", "stable")
+  # "latest" is not recommended in production due to immutability concerns
+  tag: "latest"
+
+  # Image pull policy:
+  # - Always: pull image every time the pod starts
+  # - IfNotPresent: pull only if not already cached
+  # - Never: never pull image (use only local image)
+  pullPolicy: IfNotPresent
+
+# Desired number of replicas/pods for the deployment
+# Set based on load requirements and HA needs
+replicaCount: 2
+
+service:
+  # Kubernetes service type:
+  # - ClusterIP: accessible only within cluster
+  # - NodePort: exposes service on each node's IP and port
+  # - LoadBalancer: creates external LB (cloud provider required)
+  type: ClusterIP
+
+  # Port exposed by the Kubernetes Service object
+  port: 80
+
+  # Port your application listens on inside the container
+  containerPort: 8080
+
+probes:
+  # Readiness probe checks if the application is ready to serve traffic.
+  # Kubernetes will not send traffic to the pod until this probe succeeds.
+  readiness:
+    httpGet:
+      # Path to call for readiness check (should return 200 OK if ready)
+      path: /health
+      # Port on the container to use for the probe
+      port: 8080
+    # Initial delay before the first probe is initiated (in seconds)
+    initialDelaySeconds: 5
+    # Frequency of the probe execution (in seconds)
+    periodSeconds: 10
+
+  # Liveness probe checks if the application is still running.
+  # If it fails repeatedly, Kubernetes will restart the container.
+  liveness:
+    httpGet:
+      # Path to call for liveness check
+      path: /health
+      # Port on the container to use for the probe
+      port: 8080
+    # Initial delay before the first liveness check (in seconds)
+    initialDelaySeconds: 10
+    # Frequency of the probe execution (in seconds)
+    periodSeconds: 10
+
+# External Secrets configuration
+# Integrates with an external secret manager (e.g., GCP Secret Manager)
+# secrets:
+#   # Reference to the SecretStore or ClusterSecretStore object
+#   secretStore: gcp-secret-store
+
+#   # Identifier for the secret key in the secret manager
+#   key: ping-key_es
+
+#   # Key-value data pairs retrieved from the secret manager
+#   data:
+#     - name: secret-name
+#       property: password
+
+# Application-specific configuration (non-sensitive values)
+# configs:
+#   # Example config parameter passed as ENV var or config map
+#   username: user
+
+# Pod resource settings:
+# Requests = minimum guaranteed resources
+# Limits = maximum resources container can consume
+resources:
+  requests:
+    # CPU requested (millicores); 100m = 0.1 CPU core
+    cpu: 100m
+    # Memory requested (in mebibytes)
+    memory: 128Mi
+
+  limits:
+    # CPU usage cap
+    cpu: 200m
+    # Memory usage cap
+    memory: 256Mi
+
+# Horizontal Pod Autoscaler (HPA) settings
+# Automatically scales the number of pods based on usage
+autoscaling:
+  # Minimum number of pods to maintain
+  minReplicas: 2
+
+  # Maximum number of pods to scale up to
+  maxReplicas: 5
+
+  # Target average CPU utilization percentage across pods
+  targetCPUUtilizationPercentage: 80
+
+  # Target average memory utilization percentage across pods
+  targetMemoryUtilizationPercentage: 70
+
+# Istio Ingress and routing configuration
+ingress:
+  dns:
+    # DNS record to be created for this service
+    name: ip-app-dns
+
+    # External target to point DNS record to
+    # Typically an ingress gateway IP or LB endpoint
+    target: gaia.dns.org.com
+
+    # Optional list of additional hostnames for the service
+    additionalHosts: []
+
+  tls:
+    # Common name of the TLS certificate (e.g., secret name)
+    cert: ip-app
+
+    # Name used in Kubernetes secret or certificate resource
+    certName: cert-name
+
+  gateway:
+    # Name of the Istio Gateway object to bind this app to
+    name: ip-app
+
+  virtualservice:
+    - match:
+        - uri:
+            # URI path prefix that routes to this app
+            prefix: "/"
+
+      # Logical name for this routing rule (used in VirtualService spec)
+      name: "ping-routes"
+
+      route:
+        - destination:
+            # Internal Kubernetes service to forward requests to
+            host: ip-app
+
+            # Service port to target on the destination pod
+            port:
+              number: 80

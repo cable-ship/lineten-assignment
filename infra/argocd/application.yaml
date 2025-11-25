@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ip-app
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: ip-app
+spec:
+  project: prod # Prerequisite: Create an ArgoCD project with the same name
+  source:
+    repoURL: https://github.com/cable-ship/lineten-assignment.git
+    targetRevision: release/production
+    path: helm-chart
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc # NOTE: assuming ArgoCD is deployed in same cluster where apps needs to be deployed
+    namespace: backend
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
