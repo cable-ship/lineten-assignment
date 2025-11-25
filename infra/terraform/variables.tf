@@ -34,3 +34,30 @@ variable "repository_id" {
   description = "Name of you image repo for artifact registry"
   type        = string
 }
+
+variable "format" {
+  type    = string
+  default = "DOCKER"
+}
+
+variable "sa_name" {
+  description = "Service Account Name"
+  type        = string
+}
+
+variable "github_repo" {
+  description = "Github repo for CI workflow"
+  type        = string
+}
+
+variable "pool_id" {
+  description = "ID of the Workload Identity Pool"
+  type        = string
+  default     = "github-actions-pool"
+}
+
+variable "provider_id" {
+  description = "ID of the Workload Identity Provider"
+  type        = string
+  default     = "github-provider"
+}

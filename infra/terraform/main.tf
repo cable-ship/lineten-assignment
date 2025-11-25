@@ -7,3 +7,12 @@ module "artifact_registry" {
   format         = var.format
   retention_days = var.retention_days
 }
+
+module "oidc" {
+  source             = "./modules/oidc"
+  project_id         = var.project_id
+  pool_id            = var.pool_id
+  provider_id        = var.provider_id
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.sa_name}@${var.project_id}.iam.gserviceaccount.com"
+  github_repo        = var.github_repo
+}
