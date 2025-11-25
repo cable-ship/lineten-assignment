@@ -1,0 +1,32 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ (index .Values.ingress.virtualservice 0).name | default "default-virtualservice" }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+    - "{{ .Values.ingress.dns.name }}"
+  gateways:
+    - {{ .Values.ingress.gateway.name | default "default-gateway" }}
+  http:
+  {{- range .Values.ingress.virtualservice }}
+    - match:
+      {{- range .match }}
+        - uri:
+            prefix: "{{ .uri.prefix }}"
+      {{- end }}
+      {{- if .fault }}
+      fault:
+        abort:
+          httpStatus: {{ .fault.abort.httpStatus }}
+          percentage:
+            value: {{ .fault.abort.percentage.value }}
+      {{- end }}
+      route:
+      {{- range .route }}
+        - destination:
+            host: {{ .destination.host }}
+            port:
+              number: {{ .destination.port.number }}
+      {{- end }}
+  {{- end }}
