@@ -16,3 +16,14 @@ module "oidc" {
   service_account_id = "projects/${var.project_id}/serviceAccounts/${var.sa_name}@${var.project_id}.iam.gserviceaccount.com"
   github_repo        = var.github_repo
 }
+
+
+module "vpc" {
+  source        = "./modules/vpc"
+  vpc_name      = var.vpc_name
+  subnet_name   = var.subnet_name
+  subnet_cidr   = var.subnet_cidr
+  pods_cidr     = var.cluster_ipv4_cidr_block
+  services_cidr = var.services_ipv4_cidr_block
+  region        = var.region
+}
