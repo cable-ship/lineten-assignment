@@ -61,3 +61,35 @@ variable "provider_id" {
   type        = string
   default     = "github-provider"
 }
+
+variable "services_ipv4_cidr_block" {
+  description = "CIDR block range for GKE services"
+  type        = string
+}
+
+variable "cluster_ipv4_cidr_block" {
+  description = "CIDR block range for GKE pods (cluster networking)"
+  type        = string
+}
+
+variable "cidr_block" {
+  description = "CIDR block"
+  type        = string
+  default     = ""
+}
+
+variable "vpc_name" {
+  description = "Name of the Virtual Private Cloud (VPC) network"
+  type        = string
+}
+
+variable "subnet_name" {
+  description = "Name of the subnet to be created within the VPC"
+  type        = string
+}
+
+variable "subnet_cidr" {
+  description = "CIDR range for the subnet"
+  type        = string
+}
+
