@@ -1,0 +1,19 @@
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: {{ .Values.ingress.dns.name }}-dns
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpoints:
+    - dnsName: {{ .Values.ingress.dns.name }}
+      recordTTL: 300
+      targets:
+        - {{ .Values.ingress.dns.target }}
+{{- if .Values.ingress.dns.additionalHosts }}
+{{- range .Values.ingress.dns.additionalHosts }}
+    - dnsName: {{ . }}
+      recordTTL: 300
+      targets:
+        - {{ $.Values.ingress.dns.target }}
+{{- end }}
+{{- end }}

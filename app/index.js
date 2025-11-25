@@ -23,6 +23,11 @@ app.get('/ip', async (req, res) => {
   }
 });
 
+// Health check
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Catch-all
 app.get('*', (req, res) => {
   res.send('hello');
@@ -31,4 +36,3 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
-
