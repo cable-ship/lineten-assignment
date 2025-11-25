@@ -41,3 +41,20 @@ jobs:
     - name: Push Docker image
       run: |
         docker push europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/app-repo/ip-app:$IMAGE_TAG
+
+    - name: Install yq
+      run: sudo snap install yq
+
+    - name: Update values.yaml with new image tag
+      run: |
+        IMAGE_TAG=$(git rev-parse --short HEAD)
+        yq e '.image.tag = strenv(IMAGE_TAG)' -i argocd/values.yaml
+
+    - name: Commit and push updated values.yaml
+      run: |
+        IMAGE_TAG=$(git rev-parse --short HEAD)
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add argocd/values.yaml
+        git commit -m "Update image tag to $IMAGE_TAG"
+        git push
