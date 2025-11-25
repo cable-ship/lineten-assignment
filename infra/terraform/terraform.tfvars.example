@@ -1,0 +1,5 @@
+project_id               = "org-project"
+region                   = "europe-west2"
+bucket_name              = "terraform-state-trial123"
+credentials_file         = "~/keys/org-project-6657764b6e5d.json"
+location                 = "europe-west2"
