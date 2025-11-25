@@ -4,7 +4,7 @@ nameOverride: ip-app
 
 image:
   # Docker image repository hosted in the private registry
-  repository: registry.example.com/team/ip-app
+  repository: docker.io/cableship/ipapp
 
   # Docker image tag to pull (updated automatically by the workflow)
   tag: "latest"
