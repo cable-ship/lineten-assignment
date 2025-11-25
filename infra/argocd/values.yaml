@@ -1,37 +1,29 @@
 # Overrides the default Helm release name
 # Useful for naming services and resources consistently
 nameOverride: ip-app
-
 image:
   # Docker image repository hosted in the private registry
   repository: docker.io/cableship/ipapp
-
   # Docker image tag to pull (updated automatically by the workflow)
-  tag: "latest"
-
+  tag: "119b3f9"
   # Image pull policy:
   # - Always: pull image every time the pod starts
   # - IfNotPresent: pull only if not already cached
   # - Never: never pull image (use only local image)
   pullPolicy: IfNotPresent
-
 # Desired number of replicas/pods for the deployment
 # Set based on load requirements and HA needs
 replicaCount: 2
-
 service:
   # Kubernetes service type:
   # - ClusterIP: accessible only within cluster
   # - NodePort: exposes service on each node's IP and port
   # - LoadBalancer: creates external LB (cloud provider required)
   type: ClusterIP
-
   # Port exposed by the Kubernetes Service object
   port: 80
-
   # Port your application listens on inside the container
   containerPort: 8080
-
 probes:
   # Readiness probe checks if the application is ready to serve traffic.
   # Kubernetes will not send traffic to the pod until this probe succeeds.
@@ -45,7 +37,6 @@ probes:
     initialDelaySeconds: 5
     # Frequency of the probe execution (in seconds)
     periodSeconds: 10
-
   # Liveness probe checks if the application is still running.
   # If it fails repeatedly, Kubernetes will restart the container.
   liveness:
@@ -58,7 +49,6 @@ probes:
     initialDelaySeconds: 10
     # Frequency of the probe execution (in seconds)
     periodSeconds: 10
-
 # External Secrets configuration
 # Integrates with an external secret manager (e.g., GCP Secret Manager)
 # secrets:
@@ -87,66 +77,51 @@ resources:
     cpu: 100m
     # Memory requested (in mebibytes)
     memory: 128Mi
-
   limits:
     # CPU usage cap
     cpu: 200m
     # Memory usage cap
     memory: 256Mi
-
 # Horizontal Pod Autoscaler (HPA) settings
 # Automatically scales the number of pods based on usage
 autoscaling:
   # Minimum number of pods to maintain
   minReplicas: 2
-
   # Maximum number of pods to scale up to
   maxReplicas: 5
-
   # Target average CPU utilization percentage across pods
   targetCPUUtilizationPercentage: 80
-
   # Target average memory utilization percentage across pods
   targetMemoryUtilizationPercentage: 70
-
 # Istio Ingress and routing configuration
 ingress:
   dns:
     # DNS record to be created for this service
     name: ip-app-dns
-
     # External target to point DNS record to
     # Typically an ingress gateway IP or LB endpoint
     target: gaia.dns.org.com
-
     # Optional list of additional hostnames for the service
     additionalHosts: []
-
   tls:
     # Common name of the TLS certificate (e.g., secret name)
     cert: ip-app
-
     # Name used in Kubernetes secret or certificate resource
     certName: cert-name
-
   gateway:
     # Name of the Istio Gateway object to bind this app to
     name: ip-app
-
   virtualservice:
     - match:
         - uri:
             # URI path prefix that routes to this app
             prefix: "/"
-
       # Logical name for this routing rule (used in VirtualService spec)
       name: "ping-routes"
-
       route:
         - destination:
             # Internal Kubernetes service to forward requests to
             host: ip-app
-
             # Service port to target on the destination pod
             port:
               number: 80
