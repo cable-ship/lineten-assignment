@@ -25,12 +25,12 @@
    To build the image, run the following in the `/app` directory:
 
    ```bash
-   $ docker build --platform=linux/arm64 -t pingpong:v1 .
+   $ docker build --platform=linux/arm64 -t ipapp:v1 .
    ```
    To test the image locally:
 
    ```bash
-   $ docker run -d -p 3000:3000 pingpong:v1
+   $ docker run -d -p 8080:8080 ipapp:v1
    ```
    ### Option 02 - via docker-compose (suggested for development)
 
@@ -171,7 +171,7 @@
 
    This repository includes a [GitHub Actions](https://github.com/features/actions) workflow that automates the build and deployment of the application to GKE using ArgoCD and Helm.
 
-   The [argocd](./infra/argocd/) directory contains the ArgoCD `Application` manifest to deploy the Ping Pong application using Helm.
+   The [argocd](./infra/argocd/) directory contains the ArgoCD `Application` manifest to deploy the sample application using Helm.
 
    ### CI/CD Workflow
 
@@ -202,7 +202,7 @@
    ```
    ArgoCD watches the cluster (you can use the GKE cluster endpoint after creating infra using Terraform above) and the `values.yaml` for your application.
 
-   [application.yaml](./infra/argocd/application.yaml) contains a `kind: Application` manifest file for the Ping Pong application. It specifies the cluster endpoint, source repo, target branch, and ArgoCD behavior configurations.
+   [application.yaml](./infra/argocd/application.yaml) contains a `kind: Application` manifest file for the sample application. It specifies the cluster endpoint, source repo, target branch, and ArgoCD behavior configurations.
 
    ### Authentication via Workload Identity Federation
 
@@ -224,7 +224,7 @@
    You can integrate **Prometheus**, **Grafana**, and **Loki** stack for full observability. Below are key metrics to monitor application health and performance:
 
    - **CPU & Memory Usage**Tracks resource utilization at the pod and node level. Helps in tuning HPA and identifying performance bottlenecks.
-   - **Request Rate (req/sec)**Measures the number of incoming HTTP requests per second to the `ping-pong` application, especially on the `/ping` endpoint.
+   - **Request Rate (req/sec)**Measures the number of incoming HTTP requests per second to the sample application, especially on the `/ip` endpoint.
    - **Request Latency**Captures the time taken to serve requests, broken down into percentiles (e.g., p50, p95, p99). Useful for tracking response time trends and detecting latency spikes.
    - **Pod Health & Availability**Monitors readiness and liveness probe results, number of restarts, and pod scheduling status.
    - **Error Rates**
