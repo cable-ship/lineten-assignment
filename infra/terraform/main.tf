@@ -27,3 +27,19 @@ module "vpc" {
   services_cidr = var.services_ipv4_cidr_block
   region        = var.region
 }
+
+module "gke" {
+  source                   = "./modules/gke"
+  project_id               = var.project_id
+  cluster_name             = var.cluster_name
+  region                   = var.region
+  services_ipv4_cidr_block = var.services_ipv4_cidr_block
+  cluster_ipv4_cidr_block  = var.cluster_ipv4_cidr_block
+  master_ipv4_cidr_block   = var.master_ipv4_cidr_block
+  network                  = module.vpc.vpc_self_link
+  subnetwork               = module.vpc.subnet_self_link
+  cidr_block               = var.cidr_block
+  node_pools               = var.node_pools
+  location                 = var.location
+  depends_on               = [ module.vpc]
+}

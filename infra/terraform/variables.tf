@@ -62,16 +62,6 @@ variable "provider_id" {
   default     = "github-provider"
 }
 
-variable "services_ipv4_cidr_block" {
-  description = "CIDR block range for GKE services"
-  type        = string
-}
-
-variable "cluster_ipv4_cidr_block" {
-  description = "CIDR block range for GKE pods (cluster networking)"
-  type        = string
-}
-
 variable "cidr_block" {
   description = "CIDR block"
   type        = string
@@ -93,3 +83,25 @@ variable "subnet_cidr" {
   type        = string
 }
 
+variable "master_ipv4_cidr_block" {
+  description = "CIDR block range for GKE master nodes (control plane)"
+  type        = string
+}
+
+variable "node_pools" {
+  description = "List of node pool configurations for the GKE cluster"
+  type = list(object({
+    name           = string
+    machine_type   = string
+    min_node_count = number
+    max_node_count = number
+    spot_enabled   = bool
+    node_zones     = list(string)
+  }))
+}
+
+
+variable "cluster_name" {
+  description = "Name of the Google Kubernetes Engine (GKE) cluster"
+  type        = string
+}
