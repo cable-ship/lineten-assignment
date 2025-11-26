@@ -1,4 +1,4 @@
-# Infra Deploy Demo
+# Infra Deploy Demo (Public IP: 34.147.143.52)
 
 ## Overview
 
