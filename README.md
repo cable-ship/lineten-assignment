@@ -270,9 +270,5 @@
 6. **Integrate Observability Stack**
 
    - Use the Grafana + Prometheus + Loki stack to monitor application health, logs, and alerts
-   - Some dashboards are already in place - refer to the screenshots pasted above.
-7. **CI for Helm Chart Versions**
-
-   - Automate version bumps for `helm-chart/Chart.yaml` on merge
-   - Include compatibility checks for consuming `values.yaml`
-   - If compatible, auto-update `k8s/application.yaml` accordingly
+   - Some dashboards are already in place - refer to the screenshots pasted above
+7. **Add ArgoCD image updater**
