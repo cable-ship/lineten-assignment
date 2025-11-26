@@ -1,4 +1,4 @@
-1. # Infra Deploy Demo
+# Infra Deploy Demo
 
    ## Overview
 
