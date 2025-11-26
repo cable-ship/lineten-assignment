@@ -1,80 +1,92 @@
+# Override chart name for created resources
 nameOverride: backend
 
 image:
+  # Container image location
   repository: docker.io/cableship/backend
-
-  tag: "latest"
-
+  # Image tag to deploy
+  tag: "c6a4009"
+  # Image pull behavior
   pullPolicy: IfNotPresent
 
+# Number of pods to run
 replicaCount: 2
 
 service:
+  # How the service is exposed inside the cluster
   type: ClusterIP
-
+  # Service port
   port: 80
-
-  containerPort: 8080
+  # App container port
+  containerPort: 3000
 
 probes:
   readiness:
     httpGet:
-      path: /health
-      port: 8080
+      # Readiness endpoint
+      path: /backend
+      port: 3000
+    # Initial wait before checks start
     initialDelaySeconds: 5
+    # How often to check
     periodSeconds: 10
 
   liveness:
     httpGet:
-      path: /health
-      port: 8080
+      # Liveness endpoint
+      path: /backend
+      port: 3000
+    # Initial wait for liveness
     initialDelaySeconds: 10
     periodSeconds: 10
 
 resources:
+  # Minimum resources each pod needs
   requests:
     cpu: 100m
     memory: 128Mi
-
+  # Maximum resources allowed
   limits:
     cpu: 200m
     memory: 256Mi
 
 autoscaling:
+  # Lowest number of pods allowed
   minReplicas: 2
-
+  # Highest number of pods allowed
   maxReplicas: 5
-
+  # Target CPU usage for scaling
   targetCPUUtilizationPercentage: 80
-
+  # Target memory usage for scaling
   targetMemoryUtilizationPercentage: 70
 
-ingress:
-  dns:
-    name: backend-dns
-
-    target: gaia.dns.org.com
-
-    additionalHosts: []
-
-  tls:
-    cert: backend
-
-    certName: cert-name
-
-  gateway:
-    name: backend
-
-  virtualservice:
-    - match:
-        - uri:
-            prefix: "/"
-
-      name: "ping-routes"
-
-      route:
-        - destination:
-            host: backend
-
-            port:
-              number: 80
+# optional: use if app needs to be exposed on a publically accessible endpoint
+# ingress:
+#   dns:
+#     # DNS name for this app
+#     name: backend-dns
+#     # Where the DNS record should point
+#     target: exposed.dns.org.com
+#     # Extra hostnames if needed
+#     additionalHosts: []
+#   tls:
+#     # TLS cert reference
+#     cert: backend
+#     # Kubernetes secret name
+#     certName: cert-name
+#   gateway:
+#     # Istio Gateway to use
+#     name: backend
+#   virtualservice:
+#     - match:
+#         - uri:
+#             # Route all traffic with "/" prefix
+#             prefix: "/"
+#       # Route name
+#       name: backend-routes
+#       route:
+#         - destination:
+#             # Backend service to forward traffic to
+#             host: backend
+#             port:
+#               number: 80

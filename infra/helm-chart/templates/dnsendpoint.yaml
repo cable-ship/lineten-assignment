@@ -18,3 +18,4 @@ spec:
         - {{ $.Values.ingress.dns.target }}
 {{- end }}
 {{- end }}
+{{- end }}

@@ -14,3 +14,4 @@ spec:
     kind: ClusterIssuer
   duration: 2160h
   renewBefore: 360h
+{{- end }}

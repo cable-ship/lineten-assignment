@@ -1,138 +1,92 @@
-# Set your preferred Helm release name so related resources follow suit
-# Helps keep things tidy when you read cluster resources later on
+# Override chart name for created resources
 nameOverride: backend
 
 image:
-  # Where the container image actually lives (GCR, ECR, Docker Hub, etc.)
-  repository: europe-west2-docker.pkg.dev/org-project/backend-repo/backend
-
-  # Explicit tags beat "latest" when you care about predictable rollouts
-  tag: "latest"
-
-  # Choose when Kubernetes should bother pulling the image:
-  # - Always: every pod start
-  # - IfNotPresent: only if missing locally
-  # - Never: rely on whatever is already on the node
+  # Container image location
+  repository: docker.io/cableship/backend
+  # Image tag to deploy
+  tag: "c6a4009"
+  # Image pull behavior
   pullPolicy: IfNotPresent
 
-# How many pods you want running in steady state
-# Bump this for higher availability or traffic
+# Number of pods to run
 replicaCount: 2
 
 service:
-  # Pick the service exposure model:
-  # - ClusterIP: internal only
-  # - NodePort: opens a port on every node
-  # - LoadBalancer: asks the cloud for an external LB
+  # How the service is exposed inside the cluster
   type: ClusterIP
-
-  # Clients talk to this port on the Service
+  # Service port
   port: 80
-
-  # The container’s actual listening port
+  # App container port
   containerPort: 3000
 
 probes:
-  # Readiness gates traffic until the app is actually ready
   readiness:
     httpGet:
-      # Endpoint expected to return a 200 when healthy
-      path: backend
+      # Readiness endpoint
+      path: /backend
       port: 3000
-    # Give the app a few seconds to boot before probing
+    # Initial wait before checks start
     initialDelaySeconds: 5
-    # How often Kubernetes should check
+    # How often to check
     periodSeconds: 10
 
-  # Liveness keeps the pod alive only while the app behaves
   liveness:
     httpGet:
-      # Endpoint that signals the app is still kicking
-      path: backend
+      # Liveness endpoint
+      path: /backend
       port: 3000
-    # Wait a bit longer before the first liveness check
+    # Initial wait for liveness
     initialDelaySeconds: 10
-    # Probe cadence once running
     periodSeconds: 10
 
-# External Secrets hook-up (uncomment if you actually use one)
-# secrets:
-#   # Which SecretStore/ClusterSecretStore to pull from
-#   secretStore: gcp-secret-store
-#   # Which secret key holds the data
-#   key: backend-key_es
-#   # Map remote secret properties into Kubernetes secrets
-#   data:
-#     - name: secret-name
-#       property: password
-
-# App-level config that is fine to keep in Git
-# configs:
-#   # Example of something your app might expect
-#   username: user
-
-# Resource budget for each pod (requests = guaranteed, limits = cap)
 resources:
+  # Minimum resources each pod needs
   requests:
-    # 100m equals a tenth of a CPU core
     cpu: 100m
     memory: 128Mi
-
+  # Maximum resources allowed
   limits:
-    # Hard ceiling for CPU
     cpu: 200m
     memory: 256Mi
 
-# Optional: let the HPA scale up/down based on load
 autoscaling:
-  # Never go below this many pods
+  # Lowest number of pods allowed
   minReplicas: 2
-
-  # Upper bound to avoid runaway costs
+  # Highest number of pods allowed
   maxReplicas: 5
-
-  # Desired average CPU usage across the fleet
+  # Target CPU usage for scaling
   targetCPUUtilizationPercentage: 80
-
-  # Ditto for memory
+  # Target memory usage for scaling
   targetMemoryUtilizationPercentage: 70
 
-# Istio ingress bits for reaching the app from outside the cluster
+# optional: use if app needs to be exposed on a publically accessible endpoint
 ingress:
   dns:
-    # Desired DNS name for the app
+    # DNS name for this app
     name: backend-dns
-
-    # Where that DNS record should send traffic (gateway/LB IP)
+    # Where the DNS record should point
     target: exposed.dns.org.com
-
-    # Add more hostnames if you need them
+    # Extra hostnames if needed
     additionalHosts: []
-
   tls:
-    # TLS cert common name or secret identifier
+    # TLS cert reference
     cert: backend
-
-    # How that cert appears inside Kubernetes
+    # Kubernetes secret name
     certName: cert-name
-
   gateway:
-    # Gateway resource this VirtualService attaches to
+    # Istio Gateway to use
     name: backend
-
   virtualservice:
     - match:
         - uri:
-            # Route everything with this prefix to the app
+            # Route all traffic with "/" prefix
             prefix: "/"
-
-      # Friendly name for the route
-      name: "ping-routes"
-
+      # Route name
+      name: backend-routes
       route:
         - destination:
-            # Backend service that actually serves the traffic
+            # Backend service to forward traffic to
             host: backend
-
             port:
               number: 80
