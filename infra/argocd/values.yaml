@@ -4,7 +4,7 @@ image:
   # Container image location
   repository: docker.io/cableship/backend
   # Image tag to deploy
-  tag: "238e8a2"
+  tag: "5dbca22"
   # Image pull behavior
   pullPolicy: IfNotPresent
 # Number of pods to run
