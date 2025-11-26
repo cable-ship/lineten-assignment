@@ -1,33 +1,32 @@
-# Infra Deploy Demo (Public IP: 34.147.143.52)
+# Infra Deploy Demo
 
 ## Overview
-
-   This project demonstrates a production-ready deployment pipeline for a containerized Node.js application on Google Cloud Platform (GCP), using modern DevOps practices:
+This project demonstrates a production-ready deployment pipeline for a containerized Node.js application on Google Cloud Platform (GCP), using modern DevOps practices:
 
 * **Docker** for containerizing the application.
 * **Terraform** for provisioning VPC, GKE cluster, Artifact Registry, and related resources.
 * **Helm** for packaging Kubernetes manifests as reusable charts.
 * **ArgoCD** for GitOps-style continuous deployment (automatically syncing chart changes).
 * **GitHub Actions** for CI: building images, pushing to Artifact Registry, and updating Helm values.
-* **OIDC (Workload Identity Federation)** to authenticate GitHub Actions to GCP without service account keys.
 
 ### Architecture Diagram
 
 ![1764143225133](image/README/1764143225133.png)
 
+Running demo accessiblae at: http://34.147.143.52/ip # NOTE: for testing purpose it's exposed on IP address however for real-world use cases we should attach a domain to it & use HTTPS protocol
 ## Local Setup
 
 ### Option 01 - via Docker
 
-   A [Dockerfile](./app/Dockerfile) is provided to build a **lean, secure, and performant container image** suitable for testing locally and for deploying to **GKE** (Google Kubernetes Engine) or any cloud provider.
+A [Dockerfile](./app/Dockerfile) is provided to build a **lean, secure, and performant container image** suitable for testing locally and for deploying to **GKE** (Google Kubernetes Engine) or any cloud provider.
 
-   To build the image, run the following in the `/app` directory:
+To build the image, run the following in the `/app` directory:
 
 ```bash
    $ docker build --platform=linux/arm64 -t backend:v1 .
 ```
 
-   To test the image locally:
+To test the image locally:
 
 ```bash
    $ docker run -d -p 8080:8080 backend:v1
