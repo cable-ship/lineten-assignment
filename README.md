@@ -43,7 +43,7 @@ To test the image locally:
    $ docker compose up -d
 ```
 
-   This builds and runs the Docker container, exposing port 3000 locally.
+   This builds and runs the Docker container, exposing port 8080 locally.
 
 ### Key Best Practices Followed:
 
