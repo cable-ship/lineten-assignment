@@ -13,7 +13,9 @@ This project demonstrates a production-ready deployment pipeline for a container
 
 ![1764143225133](image/README/1764143225133.png)
 
-Running demo accessiblae at: http://34.147.143.52/ip # NOTE: for testing purpose it's exposed on IP address however for real-world use cases we should attach a domain to it & use HTTPS protocol
+Running demo accessiblae at: http://34.147.143.52/ip 
+**NOTE:** for testing purpose it's exposed on IP address however for real-world use cases we should attach a domain to it & use HTTPS protocol
+
 ## Local Setup
 
 ### Option 01 - via Docker
