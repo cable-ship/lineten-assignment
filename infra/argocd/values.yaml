@@ -1,17 +1,14 @@
 # Override chart name for created resources
 nameOverride: backend
-
 image:
   # Container image location
   repository: docker.io/cableship/backend
   # Image tag to deploy
-  tag: "c6a4009"
+  tag: "238e8a2"
   # Image pull behavior
   pullPolicy: IfNotPresent
-
 # Number of pods to run
 replicaCount: 2
-
 service:
   # How the service is exposed inside the cluster
   type: ClusterIP
@@ -19,7 +16,6 @@ service:
   port: 80
   # App container port
   containerPort: 3000
-
 probes:
   readiness:
     httpGet:
@@ -30,7 +26,6 @@ probes:
     initialDelaySeconds: 5
     # How often to check
     periodSeconds: 10
-
   liveness:
     httpGet:
       # Liveness endpoint
@@ -39,7 +34,6 @@ probes:
     # Initial wait for liveness
     initialDelaySeconds: 10
     periodSeconds: 10
-
 resources:
   # Minimum resources each pod needs
   requests:
@@ -49,7 +43,6 @@ resources:
   limits:
     cpu: 200m
     memory: 256Mi
-
 autoscaling:
   # Lowest number of pods allowed
   minReplicas: 2
@@ -59,7 +52,6 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # Target memory usage for scaling
   targetMemoryUtilizationPercentage: 70
-
 # optional: use if app needs to be exposed on a publically accessible endpoint
 # ingress:
 #   dns:
