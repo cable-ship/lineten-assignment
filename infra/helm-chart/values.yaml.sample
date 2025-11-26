@@ -1,154 +1,92 @@
-# Overrides the default Helm release name
-# Useful for naming services and resources consistently
-nameOverride: ip-app
+# Override chart name for created resources
+nameOverride: backend
 
 image:
-  # Docker image repository
-  # Typically stored in a container registry like GCR, ECR, Docker Hub, etc.
-  repository: europe-west2-docker.pkg.dev/org-project/ip-app-repo/ip-app
-
-  # Docker image tag to pull (e.g., "v1.2.3", "stable")
-  # "latest" is not recommended in production due to immutability concerns
-  tag: "latest"
-
-  # Image pull policy:
-  # - Always: pull image every time the pod starts
-  # - IfNotPresent: pull only if not already cached
-  # - Never: never pull image (use only local image)
+  # Container image location
+  repository: docker.io/cableship/backend
+  # Image tag to deploy
+  tag: "c6a4009"
+  # Image pull behavior
   pullPolicy: IfNotPresent
 
-# Desired number of replicas/pods for the deployment
-# Set based on load requirements and HA needs
+# Number of pods to run
 replicaCount: 2
 
 service:
-  # Kubernetes service type:
-  # - ClusterIP: accessible only within cluster
-  # - NodePort: exposes service on each node's IP and port
-  # - LoadBalancer: creates external LB (cloud provider required)
+  # How the service is exposed inside the cluster
   type: ClusterIP
-
-  # Port exposed by the Kubernetes Service object
+  # Service port
   port: 80
-
-  # Port your application listens on inside the container
+  # App container port
   containerPort: 3000
 
 probes:
-  # Readiness probe checks if the application is ready to serve traffic.
-  # Kubernetes will not send traffic to the pod until this probe succeeds.
   readiness:
     httpGet:
-      # Path to call for readiness check (should return 200 OK if ready)
-      path: ip-app
-      # Port on the container to use for the probe
+      # Readiness endpoint
+      path: /backend
       port: 3000
-    # Initial delay before the first probe is initiated (in seconds)
+    # Initial wait before checks start
     initialDelaySeconds: 5
-    # Frequency of the probe execution (in seconds)
+    # How often to check
     periodSeconds: 10
 
-  # Liveness probe checks if the application is still running.
-  # If it fails repeatedly, Kubernetes will restart the container.
   liveness:
     httpGet:
-      # Path to call for liveness check
-      path: ip-app
-      # Port on the container to use for the probe
+      # Liveness endpoint
+      path: /backend
       port: 3000
-    # Initial delay before the first liveness check (in seconds)
+    # Initial wait for liveness
     initialDelaySeconds: 10
-    # Frequency of the probe execution (in seconds)
     periodSeconds: 10
 
-# External Secrets configuration
-# Integrates with an external secret manager (e.g., GCP Secret Manager)
-# secrets:
-#   # Reference to the SecretStore or ClusterSecretStore object
-#   secretStore: gcp-secret-store
-
-#   # Identifier for the secret key in the secret manager
-#   key: ip_app-key_es
-
-#   # Key-value data pairs retrieved from the secret manager
-#   data:
-#     - name: secret-name
-#       property: password
-
-# Application-specific configuration (non-sensitive values)
-# configs:
-#   # Example config parameter passed as ENV var or config map
-#   username: user
-
-# Pod resource settings:
-# Requests = minimum guaranteed resources
-# Limits = maximum resources container can consume
 resources:
+  # Minimum resources each pod needs
   requests:
-    # CPU requested (millicores); 100m = 0.1 CPU core
     cpu: 100m
-    # Memory requested (in mebibytes)
     memory: 128Mi
-
+  # Maximum resources allowed
   limits:
-    # CPU usage cap
     cpu: 200m
-    # Memory usage cap
     memory: 256Mi
 
-# Horizontal Pod Autoscaler (HPA) settings
-# Automatically scales the number of pods based on usage
 autoscaling:
-  # Minimum number of pods to maintain
+  # Lowest number of pods allowed
   minReplicas: 2
-
-  # Maximum number of pods to scale up to
+  # Highest number of pods allowed
   maxReplicas: 5
-
-  # Target average CPU utilization percentage across pods
+  # Target CPU usage for scaling
   targetCPUUtilizationPercentage: 80
-
-  # Target average memory utilization percentage across pods
+  # Target memory usage for scaling
   targetMemoryUtilizationPercentage: 70
 
-# Istio Ingress and routing configuration
+# optional: use if app needs to be exposed on a publically accessible endpoint
 ingress:
   dns:
-    # DNS record to be created for this service
-    name: ip-app-dns
-
-    # External target to point DNS record to
-    # Typically an ingress gateway IP or LB endpoint
+    # DNS name for this app
+    name: backend-dns
+    # Where the DNS record should point
     target: exposed.dns.org.com
-
-    # Optional list of additional hostnames for the service
+    # Extra hostnames if needed
     additionalHosts: []
-
   tls:
-    # Common name of the TLS certificate (e.g., secret name)
-    cert: ip-app
-
-    # Name used in Kubernetes secret or certificate resource
+    # TLS cert reference
+    cert: backend
+    # Kubernetes secret name
     certName: cert-name
-
   gateway:
-    # Name of the Istio Gateway object to bind this app to
-    name: ip-app
-
+    # Istio Gateway to use
+    name: backend
   virtualservice:
     - match:
         - uri:
-            # URI path prefix that routes to this app
+            # Route all traffic with "/" prefix
             prefix: "/"
-
-      # Logical name for this routing rule (used in VirtualService spec)
-      name: "ping-routes"
-
+      # Route name
+      name: backend-routes
       route:
         - destination:
-            # Internal Kubernetes service to forward requests to
-            host: ip-app
-
-            # Service port to target on the destination pod
+            # Backend service to forward traffic to
+            host: backend
             port:
               number: 80

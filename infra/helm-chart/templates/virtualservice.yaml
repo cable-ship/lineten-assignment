@@ -1,3 +1,4 @@
+{{- if .Values.ingress }}
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -30,3 +31,4 @@ spec:
               number: {{ .destination.port.number }}
       {{- end }}
   {{- end }}
+{{- end }}

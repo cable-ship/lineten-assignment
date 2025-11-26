@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ip-app
+  name: backend
   namespace: argocd
   labels:
-    app.kubernetes.io/part-of: ip-app
+    app.kubernetes.io/part-of: backend
 spec:
   project: prod # Prerequisite: Create an ArgoCD project with the same name
   source:
